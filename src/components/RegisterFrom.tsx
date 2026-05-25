@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
+import { signIn } from "next-auth/react";
 type PrevProps = {
   setStep: (step: number) => void;
 };
@@ -43,6 +44,11 @@ const RegisterForm = ({ setStep }: PrevProps) => {
       setLoading(false);
     }
   };
+
+
+  const GoogleSignup =async () =>{
+    await signIn("google");
+  }
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-6 py-10">
       {/* Back Button */}
@@ -164,6 +170,7 @@ const RegisterForm = ({ setStep }: PrevProps) => {
           <button
             type="button"
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 py-3 cursor-pointer font-medium text-gray-700 transition hover:bg-gray-50 active:scale-95"
+            onClick={GoogleSignup}
           >
             <img
               src="https://www.svgrepo.com/show/475656/google-color.svg"

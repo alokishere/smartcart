@@ -25,6 +25,7 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const session = useSession();
   const router = useRouter();
+  // console.log(session)
   
 const loginUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
@@ -155,6 +156,7 @@ const loginUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
           {/* Google Button */}
           <button
             type="button"
+            onClick={()=>signIn("google")}
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 py-3 cursor-pointer font-medium text-gray-700 transition hover:bg-gray-50 active:scale-95"
           >
             <img
