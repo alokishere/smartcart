@@ -26,31 +26,31 @@ const Login = () => {
   const session = useSession();
   const router = useRouter();
   // console.log(session)
-  
-const loginUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
-  setLoading(true); // Start loading immediately
 
-  try {
-    const res = await signIn("credentials", {
-      redirect: false, // 👈 Stops the full page reload
-      email: email,
-      password: password,
-    });
+  const loginUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoading(true); // Start loading immediately
 
-    if (res?.error) {
-      // Handle login error here (e.g., show a toast notification)
-      console.error("Login failed:", res.error);
+    try {
+      const res = await signIn("credentials", {
+        redirect: false, // 👈 Stops the full page reload
+        email: email,
+        password: password,
+      });
+
+      if (res?.error) {
+        // Handle login error here (e.g., show a toast notification)
+        console.error("Login failed:", res.error);
+        setLoading(false);
+      } else {
+        // Login successful, redirect cleanly without a full reload
+        router.push("/");
+      }
+    } catch (error) {
+      console.error("An unexpected error occurred:", error);
       setLoading(false);
-    } else {
-      // Login successful, redirect cleanly without a full reload
-      router.push("/");
     }
-  } catch (error) {
-    console.error("An unexpected error occurred:", error);
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-6 py-10">
@@ -156,7 +156,11 @@ const loginUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
           {/* Google Button */}
           <button
             type="button"
-            onClick={()=>signIn("google")}
+            onClick={() =>
+              signIn("google", {
+                callbackUrl: "/",
+              })
+            }
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 py-3 cursor-pointer font-medium text-gray-700 transition hover:bg-gray-50 active:scale-95"
           >
             <img

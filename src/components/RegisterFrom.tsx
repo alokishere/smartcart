@@ -16,6 +16,7 @@ import {
 import { motion } from "framer-motion";
 import axios from "axios";
 import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 type PrevProps = {
   setStep: (step: number) => void;
 };
@@ -26,7 +27,7 @@ const RegisterForm = ({ setStep }: PrevProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+const router = useRouter()
   const registerUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -36,7 +37,7 @@ const RegisterForm = ({ setStep }: PrevProps) => {
         email: email,
         password: password,
       });
-      console.log(result.data);
+      router.push("/login");
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -47,7 +48,9 @@ const RegisterForm = ({ setStep }: PrevProps) => {
 
 
   const GoogleSignup =async () =>{
-    await signIn("google");
+    await signIn("google",{
+      callbackUrl:"/"
+    });
   }
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-white px-6 py-10">
