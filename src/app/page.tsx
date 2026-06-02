@@ -4,6 +4,9 @@ import User from "@/models/user.model"
 import { redirect } from "next/navigation"
 import EditMobileRole from "@/components/EditMobileRole"
 import Nav from "@/components/Nav"
+import AdminDashboard from "@/components/AdminDashboard"
+import DeliveryBoyDashboard from "@/components/DeliveryBoyDashboard"
+import UserDashboard from "@/components/UserDashboard"
 const page = async () => {
   await dbConnect()
   const session = await auth()
@@ -20,6 +23,8 @@ const page = async () => {
   return (
     <>
       <Nav user={JSON.parse(JSON.stringify(user))} />
+      {user.role === "admin" ? (<AdminDashboard />):user.role === "user" ? (<UserDashboard />):(<DeliveryBoyDashboard
+       />)}
     </>
   )
 }

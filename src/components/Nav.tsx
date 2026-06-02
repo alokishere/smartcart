@@ -1,6 +1,6 @@
 "use client";
 import {
-    Delete,
+  Delete,
   LogOut,
   Package,
   Search,
@@ -17,7 +17,7 @@ import { signOut } from "next-auth/react";
 const Nav = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
   const [openSearch, setopenSearch] = useState(false);
-  
+
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLDivElement>(null);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
@@ -173,28 +173,44 @@ const Nav = ({ user }: { user: User }) => {
             </motion.div>
           )}
         </AnimatePresence>
-                    <AnimatePresence>
-              {openSearch && (
-                <motion.div
-                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                  transition={{ duration: 0.2, ease: "easeOut" }}
-                  className="absolute w-[90%] top-24 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg z-50 flex items-center px-4 py-2"
-                  ref={searchDropdownRef}
-                >
-                 <Search  className="text-gray-700 w-5 h-5 mr-2" />
-                 <form className="grow" >
-                    <input value={searchInput} onChange={(e)=> setSearchInput(e.target.value)} type="text" className=" focus:outline-none focus:border-none " placeholder="search products" />
-                 </form>
-                 <button className={`${searchInput ? "" : "hidden"} text-gray-500 h-5 w-5 mr-3`} onClick={()=>{
-                    setopenSearch(true)
-                    setSearchInput("")
-                 }}><Delete className="font-thin text-sm" /></button>
-                 <button className="text-gray-500 h-5 w-5" onClick={()=>setopenSearch(false)}><X fill="currentColor" className="font-thin text-sm" /></button>
-                </motion.div>
-              )}
-            </AnimatePresence>
+        <AnimatePresence>
+          {openSearch && (
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute w-[90%] top-24 left-1/2 -translate-x-1/2 bg-white rounded-full shadow-lg z-50 flex items-center px-4 py-2"
+              ref={searchDropdownRef}
+            >
+              <Search className="text-gray-700 w-5 h-5 mr-2" />
+              <form className="grow">
+                <input
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  type="text"
+                  className=" focus:outline-none focus:border-none "
+                  placeholder="search products"
+                />
+              </form>
+              <button
+                className={`${searchInput ? "" : "hidden"} text-gray-500 h-5 w-5 mr-3`}
+                onClick={() => {
+                  setopenSearch(true);
+                  setSearchInput("");
+                }}
+              >
+                <Delete className="font-thin text-sm" />
+              </button>
+              <button
+                className="text-gray-500 h-5 w-5"
+                onClick={() => setopenSearch(false)}
+              >
+                <X fill="currentColor" className="font-thin text-sm" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
