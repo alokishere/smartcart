@@ -68,34 +68,40 @@ const Nav = ({ user }: { user: User }) => {
           Snapcart
         </Link>
 
-        <form className="hidden md:flex items-center bg-white  backdrop-blur-md rounded-full px-4 py-2 w-1/2 max-w-lg shadow-md">
-          <Search className="w-5 h-5 text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search products..."
-            className="bg-transparent text-gray-700 placeholder-gray-500 w-48 md:w-64 lg:w-96 focus:outline-none px-2 py-1"
-          />
-        </form>
+        {user.role === "user" && (
+          <form className="hidden md:flex items-center bg-white backdrop-blur-md rounded-full px-4 py-2 w-1/2 max-w-lg shadow-md">
+            <Search className="w-5 h-5 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              className="bg-transparent text-gray-700 placeholder-gray-500 w-48 md:w-64 lg:w-96 focus:outline-none px-2 py-1"
+            />
+          </form>
+        )}
 
         <div className="flex items-center gap-3 md:gap-6 relative">
-          <div
-            ref={searchButtonRef}
-            className="md:hidden relative bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-100 cursor-pointer"
-            onClick={() => {
-              setopenSearch((prev) => !prev);
-            }}
-          >
-            <Search key={"search1"} className="text-green-600 w-6 h-6" />
-          </div>
-          <Link
-            href={"/cart"}
-            className="relative bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-100 cursor-pointer"
-          >
-            <ShoppingCartIcon className="text-green-600 w-6 h-6" />
-            <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-              0
-            </span>
-          </Link>
+          {user.role === "user" && (
+            <div
+              ref={searchButtonRef}
+              className="md:hidden relative bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-100 cursor-pointer"
+              onClick={() => {
+                setopenSearch((prev) => !prev);
+              }}
+            >
+              <Search key={"search1"} className="text-green-600 w-6 h-6" />
+            </div>
+          )}
+          {user.role === "user" && (
+            <Link
+              href={"/cart"}
+              className="relative bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-100 cursor-pointer"
+            >
+              <ShoppingCartIcon className="text-green-600 w-6 h-6" />
+              <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
+                0
+              </span>
+            </Link>
+          )}
           <div
             ref={profileButtonRef}
             onClick={() => setOpen((prev) => !prev)}
@@ -151,14 +157,16 @@ const Nav = ({ user }: { user: User }) => {
                     </span>
                   </div>
                 </Link>
-                <Link
-                  onClick={() => setOpen(false)}
-                  href="/orders"
-                  className="flex items-center  text-gray-700 gap-2 px-3 py-3 hover:bg-green-100 rounded-lg"
-                >
-                  <Package />
-                  Orders
-                </Link>
+                {user.role === "user" && (
+                  <Link
+                    onClick={() => setOpen(false)}
+                    href="/orders"
+                    className="flex items-center text-gray-700 gap-2 px-3 py-3 hover:bg-green-100 rounded-lg"
+                  >
+                    <Package />
+                    Orders
+                  </Link>
+                )}
                 <button
                   onClick={() => {
                     setOpen(false);
