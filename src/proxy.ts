@@ -28,6 +28,23 @@ export default async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
+
+
+const role = token?.role
+
+if(pathname.startsWith('/user') && role !== 'user'){
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+}
+
+if(pathname.startsWith('/admin') && role !== 'admin'){
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+}
+if(pathname.startsWith('/delivery') && role !== 'deliveryboy'){
+    return NextResponse.redirect(new URL("/unauthorized", req.url));
+}
+
+
+
   return NextResponse.next();
 }
 

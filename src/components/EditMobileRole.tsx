@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 
 const roles = [
   {
@@ -27,6 +28,7 @@ const EditMobileRole = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [mobile, setMobile] = useState("");
   const router = useRouter();
+  const {update,data} = useSession()
   const handleSubmit =async () => {
  try {
   
@@ -35,9 +37,14 @@ const EditMobileRole = () => {
       mobile:mobile
     });
     if(response.data.success){
+      await update({
+        user: {
+          role: selectedRole,
+          mobile: mobile
+        }
+      })    
       router.push("/")
-    }
-   
+    } 
     
  } catch (error) {
   console.error("Error updating user role and mobile:", error);

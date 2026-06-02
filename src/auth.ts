@@ -44,22 +44,36 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email:user.email,
             image:user.image || ""
           })
-          user.id=existingUser._id.toString();
-          user.role=existingUser.role;
         }
-        else{
-          user.id=existingUser._id.toString();
-          user.role=existingUser.role;
-        }
+        user.id=existingUser._id.toString();
+        user.role=existingUser.role;
+        user.mobile=existingUser.mobile;
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
         token.name = user.name;
         token.email = user.email;
         token.role = user.role;
+        token.mobile = (user as any).mobile;
+      }
+      if (trigger === "update" && session) {
+        if (session.role) {
+          token.role = session.role;
+        }
+        if (session.mobile) {
+          token.mobile = session.mobile;
+        }
+        if (session.user) {
+          if (session.user.role) {
+            token.role = session.user.role;
+          }
+          if (session.user.mobile) {
+            token.mobile = session.user.mobile;
+          }
+        }
       }
       return token;
     },
@@ -69,6 +83,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.name = token.name as string;
         session.user.email = token.email as string;
         session.user.role = token.role as string;
+        session.user.mobile = token.mobile as string;
       }
       return session;
     },

@@ -10,7 +10,6 @@ import UserDashboard from "@/components/UserDashboard"
 const page = async () => {
   await dbConnect()
   const session = await auth()
-
   const user = await User.findById(session?.user?.id)
   if (!user) {
     redirect('/login')
