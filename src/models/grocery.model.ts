@@ -13,7 +13,6 @@ interface IGrocery {
 
 const grocerySchema = new mongoose.Schema<IGrocery>(
   {
-    _id: { type: mongoose.Types.ObjectId },
     name: { type: String, required: true },
     price: { type: String, required: true },
     image: { type: String, required: true },
