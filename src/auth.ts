@@ -16,11 +16,25 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         await dbConnect();
         const email = credentials?.email;
         const password = credentials?.password as string;
-        const user = await User.findOne({ email }).select("+password");
+        let user;
+        try {
+          user = await User.findOne({ email }).select("+password");
+          console.log("[AUTHORIZE] User found:", !!user);
+        } catch (e) {
+          console.error("[AUTHORIZE] User.findOne failed:", e);
+          throw e;
+        }
         if (!user) {
           throw new Error("User not found");
         }
-        const ismatch = await bcrypt.compare(password, user.password);
+        let ismatch;
+        try {
+          ismatch = await bcrypt.compare(password, user.password);
+          console.log("[AUTHORIZE] Password match:", ismatch);
+        } catch (e) {
+          console.error("[AUTHORIZE] bcrypt.compare failed:", e);
+          throw e;
+        }
         if (!ismatch) {
           throw new Error("Invalid password");
         }
@@ -34,20 +48,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     })
   ],
   callbacks: {
-    async signIn({user,account}){
+    async signIn({user, account}){
+      console.log("[SIGNIN CALLBACK] Provider:", account?.provider, "Email:", user?.email);
       if(account?.provider == "google"){
-        await dbConnect();
-        let existingUser= await User.findOne({email:user.email});
-        if(!existingUser){
-         existingUser = await User.create({
-            name:user.name,
-            email:user.email,
-            image:user.image || ""
-          })
+        try {
+          await dbConnect();
+          let existingUser= await User.findOne({email:user.email});
+          if(!existingUser){
+           existingUser = await User.create({
+              name:user.name,
+              email:user.email,
+              image:user.image || ""
+            })
+          }
+          user.id=existingUser._id.toString();
+          user.role=existingUser.role;
+          user.mobile=existingUser.mobile;
+        } catch (e) {
+          console.error("[SIGNIN CALLBACK] Error:", e);
+          return false;
         }
-        user.id=existingUser._id.toString();
-        user.role=existingUser.role;
-        user.mobile=existingUser.mobile;
       }
       return true;
     },

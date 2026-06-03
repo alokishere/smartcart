@@ -29,25 +29,24 @@ const Login = () => {
 
   const loginUserhandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); // Start loading immediately
+    setLoading(true);
 
     try {
       const res = await signIn("credentials", {
-        redirect: false, // 👈 Stops the full page reload
+        redirect: false,
         email: email,
         password: password,
       });
 
       if (res?.error) {
-        // Handle login error here (e.g., show a toast notification)
         console.error("Login failed:", res.error);
-        setLoading(false);
       } else {
-        // Login successful, redirect cleanly without a full reload
+        router.refresh();
         router.push("/");
       }
     } catch (error) {
       console.error("An unexpected error occurred:", error);
+    } finally {
       setLoading(false);
     }
   };

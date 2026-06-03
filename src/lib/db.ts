@@ -17,7 +17,8 @@ const dbConnect = async () => {
   }
 if (!cached.promise) {
     cached.promise = mongoose.connect(mongoURI).then((conn) => { 
-        conn.connection
+        cached.conn = conn;
+        return conn;
     })
 }
 try {
@@ -25,6 +26,7 @@ try {
     return conn;
 } catch (error) {
     console.error("Error connecting to MongoDB:", error);
+    cached.promise = null;
 }
 };
 
