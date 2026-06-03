@@ -53,12 +53,14 @@ const HeroSection = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.8 }}
+          className="absolute inset-0 w-full h-full"
         >
           <Image
             fill
             src={slides[current].bg}
             alt=""
-            className="absolute inset-0 object-cover object-center"
+            className="object-cover object-center"
+            priority
           />
           {/* overlay */}
           <div className="absolute inset-0 bg-black/40 rounded-3xl"></div>
