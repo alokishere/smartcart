@@ -453,7 +453,7 @@ const AddGrocery = () => {
 
             <div className="p-5">
               <div className="rounded-xl border border-gray-100 overflow-hidden">
-                <div className="aspect-[4/3] bg-gray-50 flex items-center justify-center">
+                <div className="aspect-4/3 bg-gray-50 flex items-center justify-center">
                   {imagePreview ? (
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
@@ -464,7 +464,7 @@ const AddGrocery = () => {
                   )}
                 </div>
                 <div className="p-4 space-y-2.5">
-                  <h4 className="font-semibold text-gray-900 text-sm leading-snug min-h-[2.5rem]">
+                  <h4 className="font-semibold text-gray-900 text-sm leading-snug min-h-10">
                     {watchedName || <span className="text-gray-300 font-normal">Product Name</span>}
                   </h4>
                   <div className="flex items-center justify-between">
