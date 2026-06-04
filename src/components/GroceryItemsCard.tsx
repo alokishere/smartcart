@@ -1,12 +1,24 @@
 "use client";
 import mongoose from "mongoose";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ShoppingCart, Check, Star } from "lucide-react";
+import {
+  Heart,
+  ShoppingCart,
+  Star,
+  Eye,
+  Minus,
+  Plus,
+  X,
+} from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch } from "@/redux/store";
+import { addToCart, decreaseCartQuantity, increaseCartQuantity, removeCartItem } from "@/redux/cartSlice";
+import { RootState } from "@/redux/store";
 
 interface IGrocery {
-  _id?: mongoose.Types.ObjectId;
+  _id: mongoose.Types.ObjectId;
   name: string;
   price: string;
   image: string;
@@ -18,14 +30,18 @@ interface IGrocery {
 }
 
 const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
-  const [added, setAdded]       = useState(false);
-  const [wished, setWished]     = useState(false);
+  const [added, setAdded] = useState(false);
+  const [wished, setWished] = useState(false);
   const [imgError, setImgError] = useState(false);
 
+  const dispatch = useDispatch<AppDispatch>();
+
+  const { cartData } = useSelector((state: RootState) => state.cart);
+  const presentItem = cartData.find((cartItem) => cartItem._id === item._id);
+
   const handleAddToCart = () => {
-    if (added) return;
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1600);
+    if (presentItem) return;
+    dispatch(addToCart({ ...item, quantity: 1 }));
   };
 
   const stars = Math.round(item.rating ?? 4.5);
@@ -58,9 +74,11 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
         )}
 
         {/* Category badge */}
-        <span className="absolute top-2.5 left-2.5 bg-green-700 text-white
+        <span
+          className="absolute top-2.5 left-2.5 bg-green-700 text-white
                          text-[10px] font-bold tracking-wide px-2.5 py-0.5 rounded-full
-                         uppercase">
+                         uppercase"
+        >
           {item.category}
         </span>
 
@@ -71,9 +89,10 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
           aria-label={wished ? "Remove from wishlist" : "Add to wishlist"}
           className={`absolute top-2 right-2.5 w-7 h-7 rounded-full border flex items-center justify-center
                       transition-colors duration-200 bg-white
-                      ${wished
-                        ? "border-red-300 text-red-400"
-                        : "border-green-100 text-gray-300 hover:border-red-200 hover:text-red-300"
+                      ${
+                        wished
+                          ? "border-red-300 text-red-400"
+                          : "border-green-100 text-gray-300 hover:border-red-200 hover:text-red-300"
                       }`}
         >
           <Heart
@@ -90,10 +109,15 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
         <h3 className="text-[13px] sm:text-sm font-bold text-gray-800 leading-snug line-clamp-2 mb-1">
           {item.name}
         </h3>
-
-        {/* Unit */}
-        <p className="text-[11px] text-gray-400 font-semibold mb-2">{item.unit}</p>
-
+        <div>
+          <span className="text-base sm:text-lg font-extrabold text-green-700">
+            ₹{item.price}
+          </span>
+          <span className="text-[10px] text-green-400 font-semibold">
+            {" "}
+            /{item.unit}
+          </span>
+        </div>
         {/* Stars */}
         <div className="flex items-center gap-1 mb-3">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -111,12 +135,13 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
 
         {/* Price + CTA */}
         <div className="flex items-center justify-between mt-auto gap-2">
-          <div>
-            <span className="text-base sm:text-lg font-extrabold text-green-700">
-              ₹{item.price}
-            </span>
-            <span className="text-[10px] text-green-400 font-semibold"> /unit</span>
-          </div>
+          <motion.span
+            whileTap={{ scale: 0.93 }}
+            className="flex items-center text-xs text-green-700 font-bold px-2 py-1 bg-green-100 hover:bg-green-200 rounded-xl justify-center gap-1 cursor-pointer"
+          >
+            <Eye className="w-3.5 h-3.5" />
+            view
+          </motion.span>
 
           <motion.button
             whileTap={{ scale: 0.93 }}
@@ -124,13 +149,14 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
             aria-label={`Add ${item.name} to cart`}
             className={`flex items-center gap-1.5 text-white text-[11px] sm:text-xs
                         font-bold px-3 py-1.5 rounded-xl transition-all duration-200
-                        ${added
-                          ? "bg-green-500 cursor-default"
-                          : "bg-green-700 hover:bg-green-800 active:scale-95"
+                        ${
+                          added
+                            ? "bg-green-500 cursor-default"
+                            : "bg-green-700 hover:bg-green-800 active:scale-95"
                         }`}
           >
             <AnimatePresence mode="wait" initial={false}>
-              {added ? (
+              {presentItem ? (
                 <motion.span
                   key="check"
                   initial={{ opacity: 0, scale: 0.7 }}
@@ -138,9 +164,10 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
                   exit={{ opacity: 0, scale: 0.7 }}
                   transition={{ duration: 0.18 }}
                   className="flex items-center gap-1"
+                  onClick={()=>dispatch(removeCartItem(item._id))}
                 >
-                  <Check className="w-3.5 h-3.5" strokeWidth={2.5} />
-                  Added!
+                  <X className="w-3 h-3" strokeWidth={2.5} />
+                  Remove 
                 </motion.span>
               ) : (
                 <motion.span
@@ -155,9 +182,38 @@ const GroceryItemsCard = ({ item }: { item: IGrocery }) => {
                   Add
                 </motion.span>
               )}
+              {/* add + and - buttons if item is present in cart*/}
             </AnimatePresence>
           </motion.button>
         </div>
+        {presentItem && (
+          <div className="w-full flex justify-around items-center bg-green-200/30 p-1.5 mt-1 rounded-xl">
+            <motion.span
+              whileTap={{ scale: 0.93 }}
+              onClick={() => {
+                dispatch(decreaseCartQuantity(item._id));
+                if(presentItem.quantity == 1){
+                  dispatch(removeCartItem(item._id))
+                }
+              }}
+              className=" bg-green-200 p-1 rounded-full"
+            >
+              <Minus className="w-3.5 h-3.5 text-red-500" strokeWidth={5} />
+            </motion.span>
+            <span className="text-gray-600 font-semibold text-sm">
+              {presentItem.quantity}
+            </span>
+            <motion.span
+              whileTap={{ scale: 0.93 }}
+              onClick={() => {
+                dispatch(increaseCartQuantity(item._id));
+              }}
+              className="bg-green-200 p-1 rounded-full"
+            >
+              <Plus className="w-3.5 h-3.5 text-green-600 " strokeWidth={5} />
+            </motion.span>
+          </div>
+        )}
       </div>
     </motion.div>
   );

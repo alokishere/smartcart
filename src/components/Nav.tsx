@@ -14,6 +14,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { signOut } from "next-auth/react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/redux/store";
 const Nav = ({ user }: { user: User }) => {
   const [open, setOpen] = useState(false);
   const [openSearch, setopenSearch] = useState(false);
@@ -56,6 +58,9 @@ const Nav = ({ user }: { user: User }) => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+const {cartData}= useSelector((state:RootState)=>state.cart)
+
   return (
     //  left tittle center search input and right cart icon and user avater icon should be on top bar
     <div className="">
@@ -93,12 +98,12 @@ const Nav = ({ user }: { user: User }) => {
           )}
           {user.role === "user" && (
             <Link
-              href={"/cart"}
+              href={"user/cart"}
               className="relative bg-white rounded-full w-11 h-11 flex items-center justify-center shadow-md hover:scale-105 transition-transform duration-100 cursor-pointer"
             >
               <ShoppingCartIcon className="text-green-600 w-6 h-6" />
               <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">
-                0
+                {cartData.length}
               </span>
             </Link>
           )}
