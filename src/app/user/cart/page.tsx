@@ -29,20 +29,20 @@ const PROMO_DISCOUNT = 0.1;
 
 const CartPage = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { cartData } = useSelector((state: RootState) => state.cart);
+  const { cartData ,subTotal,deliveryFee,discount,finalTotal } = useSelector((state: RootState) => state.cart);
 
   const [promoInput, setPromoInput] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
   const [promoError, setPromoError] = useState(false);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
-  const subtotal = cartData.reduce(
-    (sum, item) => sum + parseFloat(item.price) * item.quantity,
-    0
-  );
-  const discount = promoApplied ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
-  const total = subtotal + DELIVERY_FEE - discount;
-  const totalItems = cartData.reduce((s, i) => s + i.quantity, 0);
+  // const subtotal = cartData.reduce(
+  //   (sum, item) => sum + parseFloat(item.price) * item.quantity,
+  //   0
+  // );
+  // const discount = promoApplied ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
+  // const total = subtotal + DELIVERY_FEE - discount;
+
 
   const handlePromo = () => {
     if (promoApplied) return;
@@ -116,7 +116,7 @@ const CartPage = () => {
           </Link>
           <h1 className="text-xl font-extrabold text-green-900">My Cart</h1>
           <span className="bg-green-100 text-green-700 text-[11px] font-bold px-3 py-0.5 rounded-full">
-            {totalItems} item{totalItems !== 1 ? "s" : ""}
+            {subTotal} item{subTotal !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -247,13 +247,13 @@ const CartPage = () => {
             <div className="space-y-3 text-sm">
               <div className="flex justify-between text-gray-600">
                 <span>
-                  Subtotal ({totalItems} item{totalItems !== 1 ? "s" : ""})
+                  Subtotal ({cartData.reduce((acc, item) => acc + item.quantity, 0)} item{cartData.length !== 1 ? "s" : ""})
                 </span>
-                <span className="font-bold text-gray-800">₹{subtotal}</span>
+                <span className="font-bold text-gray-800">₹{subTotal}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Delivery fee</span>
-                <span className="font-bold text-gray-800">₹{DELIVERY_FEE}</span>
+                <span className="font-bold text-gray-800">₹{deliveryFee}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Discount</span>
@@ -269,7 +269,7 @@ const CartPage = () => {
 
             <div className="flex justify-between items-center text-base font-extrabold text-green-900 mb-4">
               <span>Total</span>
-              <span>₹{total}</span>
+              <span>₹{finalTotal}</span>
             </div>
 
             {/* Savings badge */}
@@ -325,15 +325,16 @@ const CartPage = () => {
             )}
 
             {/* Checkout */}
-            <motion.button
-              whileTap={{ scale: 0.97 }}
+            <Link
+              href="/user/checkout"
+
               className="w-full bg-green-700 hover:bg-green-800 text-white font-extrabold
                          py-3.5 rounded-2xl flex items-center justify-center gap-2 text-sm
-                         transition-colors"
+                         duration-200 active:scale-95 hover:cursor-pointer transition-colors"
             >
               <ShieldCheck className="w-4 h-4" />
               Proceed to Checkout
-            </motion.button>
+            </Link>
 
             <p className="text-center text-[11px] text-gray-400 mt-3 flex items-center justify-center gap-1">
               <ShieldCheck className="w-3 h-3" />
