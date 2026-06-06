@@ -1,31 +1,34 @@
 "use client";
 
 import { RootState } from "@/redux/store";
+import axios from "axios";
 import { motion } from "framer-motion";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
-import L, { LatLngExpression } from "leaflet";
-
+import { OpenStreetMapProvider } from "leaflet-geosearch";
 import {
   ArrowLeft,
   Landmark,
+  Loader2,
+  LocateFixed,
   LocationEdit,
   MapPin,
   Navigation,
   Phone,
-  Pin,
   Search,
   User,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
-    const iconMarker = new L.icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/128/2776/2776067.png",
-    iconSize: [35, 35],
-    iconAnchor: [18, 35],
-  });
+const LeafletMap = dynamic(() => import("@/components/LeafletMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full w-full flex items-center justify-center bg-gray-50 rounded-xl text-gray-400 text-sm">
+      Loading map...
+    </div>
+  ),
+});
 
 const Checkout = () => {
   const { userData } = useSelector((state: RootState) => state.user);
@@ -40,21 +43,44 @@ const Checkout = () => {
   const router = useRouter();
 
   const [positions, setpositions] = useState<[number, number] | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
 
+  //search query handler
+  const searchQueryHandler = async () => {
+    setSearchLoading(true);
+    if (searchQuery.trim().length == 0) {
+      setSearchLoading(false);
+      return;
+    }
+    const provider = new OpenStreetMapProvider();
+    const results = await provider.search({ query: searchQuery });
+    setSuggestions(results);
+    setShowSuggestions(true);
+    setSearchLoading(false);
+  };
+
+  //handle click suggestion
+  const handleSuggestionClick = (suggestion: any) => {
+    setpositions([suggestion.y, suggestion.x]);
+    setShowSuggestions(false);
+    setSearchQuery("");
+  };
   useEffect(() => {
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
-        setpositions([position.coords.latitude, position.coords.longitude]);
-      }, (error) => {
-        console.log("location error",error);
-      },{
-        enableHighAccuracy:true
-      }
-    )
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setpositions([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.log("location error", error);
+        },
+        { enableHighAccuracy: true },
+      );
     }
   }, []);
-
-  console.log("positions", positions);
 
   useEffect(() => {
     if (userData) {
@@ -66,8 +92,30 @@ const Checkout = () => {
     }
   }, [userData]);
 
+  useEffect(() => {
+    const fetchAdsress = async () => {
+      if (!positions) return;
+      try {
+        const result = await axios.get(
+          `https://nominatim.openstreetmap.org/reverse?lat=${positions[0]}&lon=${positions[1]}&format=jsonv2&`,
+        );
+        setaddress((prev) => ({
+          ...prev,
+          city: result.data.address.county || result.data.address.city,
+          state: result.data.address.state || "",
+          pinCode: result.data.address.postcode || "",
+          fullAddress: result.data.display_name || "",
+        }));
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchAdsress();
+  }, [positions]);
+
   return (
-    <div className=" max-w-5xl w-[90%] md:w-[80%] relative mx-auto flex">
+    <div className="max-w-5xl w-[90%] md:w-[80%] relative mx-auto flex">
       <motion.div
         initial={{ opacity: 0, x: 10, scale: 0.95 }}
         animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -87,22 +135,19 @@ const Checkout = () => {
         Checkout
       </motion.h1>
 
-      {/* map and form  */}
-
       <div className="w-full grid md:grid-cols-2 grid-cols-1 gap-8 mt-20">
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.5 }}
-          className="w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 p-6 border-gray-100"
+          className="w-full bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-200 p-4 border-gray-100"
         >
-          {/*delivey address  */}
           <h2 className="text-xl font-semibold text-gray-700 mb-4 flex items-center gap-2">
             <MapPin />
             Delivery Address
           </h2>
-          <div className="space-y-4">
-            <div className="flex w-full border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center ">
+          <div className="space-y-3">
+            <div className="flex w-full border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
               <User className="h-4 w-4 text-green-600" />
               <input
                 type="text"
@@ -111,10 +156,10 @@ const Checkout = () => {
                   setaddress((prev) => ({ ...prev, fullName: e.target.value }))
                 }
                 placeholder="Full Name"
-                className="outline-none w-full"
+                className="outline-none w-full text-sm"
               />
             </div>
-            <div className="flex w-full border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center ">
+            <div className="flex w-full border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
               <Phone className="h-4 w-4 text-green-600" />
               <input
                 type="text"
@@ -123,10 +168,10 @@ const Checkout = () => {
                   setaddress((prev) => ({ ...prev, mobile: e.target.value }))
                 }
                 placeholder="Mobile Number"
-                className="outline-none w-full"
+                className="outline-none w-full text-sm"
               />
             </div>
-            <div className="flex w-full border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center ">
+            <div className="flex w-full border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
               <Landmark className="h-4 w-4 text-green-600" />
               <input
                 type="text"
@@ -138,12 +183,11 @@ const Checkout = () => {
                   }))
                 }
                 placeholder="Full Address"
-                className="outline-none w-full"
+                className="outline-none w-full text-sm"
               />
             </div>
-            {/* city,state,pincode in one row */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="flex border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center ">
+              <div className="flex border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
                 <MapPin className="h-4 w-4 text-green-600" />
                 <input
                   type="text"
@@ -152,7 +196,7 @@ const Checkout = () => {
                     setaddress((prev) => ({ ...prev, city: e.target.value }))
                   }
                   placeholder="City"
-                  className="outline-none w-full"
+                  className="outline-none w-full text-sm"
                 />
               </div>
               <div className="flex border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
@@ -164,7 +208,7 @@ const Checkout = () => {
                     setaddress((prev) => ({ ...prev, state: e.target.value }))
                   }
                   placeholder="State"
-                  className="outline-none w-full"
+                  className="outline-none w-full text-sm"
                 />
               </div>
               <div className="flex border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
@@ -176,54 +220,80 @@ const Checkout = () => {
                     setaddress((prev) => ({ ...prev, pinCode: e.target.value }))
                   }
                   placeholder="Pincode"
-                  className="outline-none w-full"
+                  className="outline-none w-full text-sm"
                 />
               </div>
             </div>
-            {/* input for custopm search */}
             <div>
-              <div className="flex  border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center ">
+              <div className="flex border border-gray-200 focus:border-green-500 px-2 py-1 rounded-md gap-2 items-center">
                 <Search className="h-4 w-4 text-green-600" />
                 <input
                   type="text"
-                  placeholder="search city or area"
-                  className="outline-none w-full"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search city or area"
+                  className="outline-none w-full text-sm"
                 />
-                <button className="px-2 py-1 rounded-md bg-green-600 text-white">
-                  Search
+                <button
+                  onClick={searchQueryHandler}
+                  className="px-2 py-1 rounded-md bg-green-600 text-white"
+                >
+                  {searchLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    "Search"
+                  )}
                 </button>
               </div>
+              {showSuggestions && suggestions.length > 0 && (
+                <div>
+                  {suggestions.map((suggestion, index) => (
+                    <div
+                      key={index}
+                      onClick={() => {
+                        handleSuggestionClick(suggestion);
+                        setSearchQuery(suggestion.label);
+
+                      }}
+                      className="p-2 border-b border-gray-200 hover:bg-green-100 cursor-pointer"
+                    >
+                      <p>{suggestion.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <div className="h-84 w-full shadow-lg shadow-gray-200 border border-gray-50 rounded-lg">
-               <MapContainer
-      center={positions as LatLngExpression}
-      zoom={13}
-      scrollWheelZoom={true}
-      style={{
-        height: "100%",
-        width: "100%",
-        borderRadius: "12px",
-        zIndex: 0,
-      }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <Marker
-       position={positions as LatLngExpression} 
-       icon={iconMarker} 
-       draggable={true}
-       eventHandlers={{
-        dragend: (e:L.LeafletEvent) => {
-          const marker = e.target as L.Marker;
-          const { lat,lng} = marker.getLatLng();
-          setpositions([lat,lng]);
-        },
-       }}
-       />
-    </MapContainer>
-              
+
+            {/* ✅ Only render map once we have GPS coordinates */}
+            <div className="relative h-72 w-full shadow-lg shadow-gray-200 border border-gray-50 rounded-lg">
+              {positions ? (
+                <LeafletMap
+                  positions={positions}
+                  onPositionChange={(lat, lng) => setpositions([lat, lng])}
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-gray-50 rounded-xl text-gray-400 text-sm">
+                  Fetching your location...
+                </div>
+              )}
+              {/* go to current loaction button */}
+              <motion.button
+               whileHover={{scale:1.1}}
+               whileTap={{scale:0.9}}
+                onClick={() =>
+                  navigator.geolocation.getCurrentPosition((position) =>{
+                    setpositions([
+                      position.coords.latitude,
+                      position.coords.longitude,
+                    ]);
+                    setSearchQuery('')
+                  }
+                  )
+                }
+                className="p-2 rounded-full bg-green-600 text-white absolute top-4 right-4 z-10"
+              >
+                <LocateFixed className="h-4 w-4" />
+              </motion.button>
             </div>
           </div>
         </motion.div>
