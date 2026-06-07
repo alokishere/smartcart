@@ -3,7 +3,7 @@
 import { MapContainer, Marker, TileLayer, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L, { LatLngExpression } from "leaflet";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect } from "react";
 import React from "react";
 
 // ✅ Fix: Use L.Icon (capital I) — L.icon is a factory fn but typed as L.Icon
@@ -45,6 +45,7 @@ const LeafletMap = ({ positions, onPositionChange }: LeafletMapProps) => {
     
   return (
     <MapContainer
+   key={`${positions[0]},${positions[1]}`}
       center={positions as LatLngExpression}
       zoom={13}
       scrollWheelZoom={true}

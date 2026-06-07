@@ -23,9 +23,8 @@ import {
 } from "@/redux/cartSlice";
 import mongoose from "mongoose";
 
-const DELIVERY_FEE = 40;
+
 const PROMO_CODE = "SMART10";
-const PROMO_DISCOUNT = 0.1;
 
 const CartPage = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,12 +35,6 @@ const CartPage = () => {
   const [promoError, setPromoError] = useState(false);
   const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
-  // const subtotal = cartData.reduce(
-  //   (sum, item) => sum + parseFloat(item.price) * item.quantity,
-  //   0
-  // );
-  // const discount = promoApplied ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
-  // const total = subtotal + DELIVERY_FEE - discount;
 
 
   const handlePromo = () => {
